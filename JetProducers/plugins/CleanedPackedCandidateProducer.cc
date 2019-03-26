@@ -46,7 +46,7 @@ class CleanedPackedCandidateProducer : public edm::stream::EDProducer<>
       virtual void produce(edm::Event&, const edm::EventSetup&);
       
       // source of objs to remove
-      edm::EDGetTokenT<std::vector<PatType> > src_;
+      edm::EDGetTokenT<edm::RefVector<std::vector<PatType> > > src_;
 
       // source of PF candidates
       edm::EDGetTokenT<pat::PackedCandidateCollection> pfCandSrc_;
@@ -60,7 +60,7 @@ class CleanedPackedCandidateProducer : public edm::stream::EDProducer<>
 //
 template<class PatType>
 CleanedPackedCandidateProducer<PatType>::CleanedPackedCandidateProducer(const edm::ParameterSet& iConfig):
-  src_(consumes<std::vector<PatType> >(iConfig.getParameter<edm::InputTag>("src"))),
+  src_(consumes<edm::RefVector<std::vector<PatType> > >(iConfig.getParameter<edm::InputTag>("src"))),
   pfCandSrc_(consumes<pat::PackedCandidateCollection>(iConfig.getParameter<edm::InputTag>("pfCandSrc")))
 {
   cfg_ = const_cast<edm::ParameterSet*>(&iConfig);
@@ -78,7 +78,7 @@ template<class PatType>
 void
 CleanedPackedCandidateProducer<PatType>::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-  edm::Handle<std::vector<PatType> > objs;
+  edm::Handle<edm::RefVector<std::vector<PatType> > > objs;
   iEvent.getByToken(src_, objs);
 
   edm::Handle<pat::PackedCandidateCollection> pfCands;
@@ -88,10 +88,10 @@ CleanedPackedCandidateProducer<PatType>::produce(edm::Event& iEvent, const edm::
   std::vector<reco::CandidatePtr> PFs;
   if (objs.isValid()) 
   {
-    for (typename std::vector<PatType>::const_iterator iObj = objs->begin(); iObj != objs->end(); ++iObj)
+    for (typename edm::RefVector<std::vector<PatType> >::const_iterator iObj = objs->begin(); iObj != objs->end(); ++iObj)
     {
-      for (unsigned int j = 0; j<iObj->numberOfSourceCandidatePtrs(); j++) {
-        PFs.push_back(iObj->sourceCandidatePtr(j));
+      for (unsigned int j = 0; j<(*iObj)->numberOfSourceCandidatePtrs(); j++) {
+        PFs.push_back((*iObj)->sourceCandidatePtr(j));
       }
     }
   }
