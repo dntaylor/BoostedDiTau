@@ -59,7 +59,7 @@ class ElectronCleanedMiniAODJetProducer : public edm::stream::EDProducer<>
       edm::EDGetTokenT<reco::PFJetCollection> jetSrc_;
 
       // source of electrons that, if found within jet, should be removed
-      edm::EDGetTokenT<pat::ElectronCollection> electronSrc_;
+      edm::EDGetTokenT<edm::RefVector<pat::ElectronCollection> > electronSrc_;
 
       // source of PF candidates
       edm::EDGetTokenT<pat::PackedCandidateCollection> pfCandSrc_;
@@ -82,7 +82,7 @@ class ElectronCleanedMiniAODJetProducer : public edm::stream::EDProducer<>
 //
 ElectronCleanedMiniAODJetProducer::ElectronCleanedMiniAODJetProducer(const edm::ParameterSet& iConfig):
   jetSrc_(consumes<reco::PFJetCollection>(iConfig.getParameter<edm::InputTag>("jetSrc"))),
-  electronSrc_(consumes<pat::ElectronCollection>(iConfig.getParameter<edm::InputTag>("electronSrc"))),
+  electronSrc_(consumes<edm::RefVector<pat::ElectronCollection> >(iConfig.getParameter<edm::InputTag>("electronSrc"))),
   pfCandSrc_(consumes<pat::PackedCandidateCollection>(iConfig.getParameter<edm::InputTag>("pfCandSrc")))
 {
   cfg_ = const_cast<edm::ParameterSet*>(&iConfig);
@@ -116,7 +116,7 @@ ElectronCleanedMiniAODJetProducer::produce(edm::Event& iEvent, const edm::EventS
   iEvent.getByToken(jetSrc_, pfJets);
   std::unique_ptr<reco::PFJetCollection> SetOfJets( new reco::PFJetCollection );
 
-  edm::Handle<pat::ElectronCollection> electrons;
+  edm::Handle<edm::RefVector<pat::ElectronCollection> > electrons;
   iEvent.getByToken(electronSrc_, electrons);
 
   edm::Handle<pat::PackedCandidateCollection> pfCands;
@@ -126,10 +126,10 @@ ElectronCleanedMiniAODJetProducer::produce(edm::Event& iEvent, const edm::EventS
   std::vector<reco::CandidatePtr> electronPFs;
   if (electrons.isValid()) 
   {
-    for (pat::ElectronCollection::const_iterator iElectron = electrons->begin(); iElectron != electrons->end(); ++iElectron)
+    for (edm::RefVector<pat::ElectronCollection>::const_iterator iElectron = electrons->begin(); iElectron != electrons->end(); ++iElectron)
     {
-      for (unsigned int j = 0; j<iElectron->numberOfSourceCandidatePtrs(); j++) {
-        electronPFs.push_back(iElectron->sourceCandidatePtr(j));
+      for (unsigned int j = 0; j<(*iElectron)->numberOfSourceCandidatePtrs(); j++) {
+        electronPFs.push_back((*iElectron)->sourceCandidatePtr(j));
       }
     }
   }

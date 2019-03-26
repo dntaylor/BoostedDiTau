@@ -114,7 +114,7 @@ if doLower:
 if doMuTau:
     #jetSrc = 'patJetsMuonCleaned'
     #recoJetSrc = 'ak4PFJetsMuonCleaned'
-    #process.recoMuonsForJetCleaning = cms.EDFilter('MuonRefSelector',
+    #process.recoMuonsForJetCleaning = cms.EDFilter('PATMuonRefSelector',
     #    src = cms.InputTag('slimmedMuons'),
     #    cut = cms.string('pt > 3.0 && isPFMuon && (isGlobalMuon || isTrackerMuon)'),
     #)

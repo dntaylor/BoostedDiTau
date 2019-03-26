@@ -59,7 +59,7 @@ class MuonCleanedMiniAODJetProducer : public edm::stream::EDProducer<>
       edm::EDGetTokenT<reco::PFJetCollection> jetSrc_;
 
       // source of muons that, if found within jet, should be removed
-      edm::EDGetTokenT<pat::MuonCollection> muonSrc_;
+      edm::EDGetTokenT<edm::RefVector<pat::MuonCollection> > muonSrc_;
 
       // source of PF candidates
       edm::EDGetTokenT<pat::PackedCandidateCollection> pfCandSrc_;
@@ -82,7 +82,7 @@ class MuonCleanedMiniAODJetProducer : public edm::stream::EDProducer<>
 //
 MuonCleanedMiniAODJetProducer::MuonCleanedMiniAODJetProducer(const edm::ParameterSet& iConfig):
   jetSrc_(consumes<reco::PFJetCollection>(iConfig.getParameter<edm::InputTag>("jetSrc"))),
-  muonSrc_(consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("muonSrc"))),
+  muonSrc_(consumes<edm::RefVector<pat::MuonCollection> >(iConfig.getParameter<edm::InputTag>("muonSrc"))),
   pfCandSrc_(consumes<pat::PackedCandidateCollection>(iConfig.getParameter<edm::InputTag>("pfCandSrc")))
 {
   cfg_ = const_cast<edm::ParameterSet*>(&iConfig);
@@ -116,7 +116,7 @@ MuonCleanedMiniAODJetProducer::produce(edm::Event& iEvent, const edm::EventSetup
   iEvent.getByToken(jetSrc_, pfJets);
   std::unique_ptr<reco::PFJetCollection> SetOfJets( new reco::PFJetCollection );
 
-  edm::Handle<pat::MuonCollection> muons;
+  edm::Handle<edm::RefVector<pat::MuonCollection> > muons;
   iEvent.getByToken(muonSrc_, muons);
 
   edm::Handle<pat::PackedCandidateCollection> pfCands;
@@ -126,10 +126,10 @@ MuonCleanedMiniAODJetProducer::produce(edm::Event& iEvent, const edm::EventSetup
   std::vector<reco::CandidatePtr> muonPFs;
   if (muons.isValid()) 
   {
-    for (pat::MuonCollection::const_iterator iMuon = muons->begin(); iMuon != muons->end(); ++iMuon)
+    for (edm::RefVector<pat::MuonCollection>::const_iterator iMuon = muons->begin(); iMuon != muons->end(); ++iMuon)
     {
-      for (unsigned int j = 0; j<iMuon->numberOfSourceCandidatePtrs(); j++) {
-        muonPFs.push_back(iMuon->sourceCandidatePtr(j));
+      for (unsigned int j = 0; j<(*iMuon)->numberOfSourceCandidatePtrs(); j++) {
+        muonPFs.push_back((*iMuon)->sourceCandidatePtr(j));
       }
     }
   }
