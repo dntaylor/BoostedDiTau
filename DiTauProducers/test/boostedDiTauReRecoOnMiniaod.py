@@ -56,7 +56,8 @@ process.out = cms.EndPath(process.output)
 ######################
 ### rerun tau reco ###
 ######################
-import RecoTauTag.Configuration.tools.adaptToRunAtMiniAOD as tauAtMiniTools
+#import RecoTauTag.Configuration.tools.adaptToRunAtMiniAOD as tauAtMiniTools
+import BoostedDiTau.DiTauProducers.adaptToRunAtMiniAOD as tauAtMiniTools
 tauAtMiniTools.addTauReReco(process)
 
 # lower the pt threshold
